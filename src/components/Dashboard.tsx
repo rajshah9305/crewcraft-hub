@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Bot, Users, Zap, TrendingUp, ArrowRight, Sparkles } from "lucide-react";
+import { RecentRuns } from "./RecentRuns";
 import heroImage from "@/assets/hero-agents.jpg";
 
 interface DashboardProps {
@@ -155,7 +156,10 @@ export const Dashboard = ({ agentCount, onNavigate }: DashboardProps) => {
         </div>
       </div>
 
-      {/* Recent Activity */}
+      {/* Recent Runs */}
+      <RecentRuns />
+
+      {/* Getting Started */}
       <div className="space-y-4">
         <h2 className="text-2xl font-semibold text-foreground">Getting Started</h2>
         <Card className="bg-gradient-to-br from-card to-secondary/30 border-border/50">
