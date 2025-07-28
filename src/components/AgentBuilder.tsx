@@ -5,8 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Plus, X, Save, Bot } from "lucide-react";
+import { Plus, X, Save, Bot, TestTube } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { AgentTester } from "./AgentTester";
 
 interface Agent {
   id: string;
@@ -35,7 +36,13 @@ export const AgentBuilder = ({ agent, onSave, onCancel }: AgentBuilderProps) => 
   });
   
   const [newTool, setNewTool] = useState("");
+  const [showTester, setShowTester] = useState(false);
   const { toast } = useToast();
+
+  const currentAgent = {
+    id: agent?.id || 'preview',
+    ...formData
+  };
 
   const handleAddTool = () => {
     if (newTool.trim() && !formData.tools.includes(newTool.trim())) {
@@ -73,21 +80,47 @@ export const AgentBuilder = ({ agent, onSave, onCancel }: AgentBuilderProps) => 
     });
   };
 
+  if (showTester) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <Button variant="outline" onClick={() => setShowTester(false)}>
+            ← Back to Builder
+          </Button>
+          <h2 className="text-xl font-semibold">Test Agent</h2>
+        </div>
+        <AgentTester agent={currentAgent} />
+      </div>
+    );
+  }
+
   return (
     <Card className="max-w-2xl mx-auto bg-gradient-to-br from-card to-secondary/30">
       <CardHeader>
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/20 text-primary">
-            <Bot className="h-6 w-6" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/20 text-primary">
+              <Bot className="h-6 w-6" />
+            </div>
+            <div>
+              <CardTitle className="text-xl">
+                {agent ? 'Edit Agent' : 'Create New Agent'}
+              </CardTitle>
+              <CardDescription>
+                Configure your AI agent's role, goals, and capabilities
+              </CardDescription>
+            </div>
           </div>
-          <div>
-            <CardTitle className="text-xl">
-              {agent ? 'Edit Agent' : 'Create New Agent'}
-            </CardTitle>
-            <CardDescription>
-              Configure your AI agent's role, goals, and capabilities
-            </CardDescription>
-          </div>
+          {formData.name && formData.role && formData.goal && (
+            <Button 
+              variant="outline" 
+              onClick={() => setShowTester(true)}
+              className="shrink-0"
+            >
+              <TestTube className="h-4 w-4 mr-2" />
+              Test Agent
+            </Button>
+          )}
         </div>
       </CardHeader>
       
