@@ -1,8 +1,12 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Bot, Users, Zap, TrendingUp, ArrowRight, Sparkles } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Bot, Users, Zap, TrendingUp, ArrowRight, Sparkles, Settings } from "lucide-react";
 import { RecentRuns } from "./RecentRuns";
+import { CerebrasApiKeyDialog } from "./CerebrasApiKeyDialog";
+import { useState, useEffect } from "react";
+import { CerebrasService } from "@/services/cerebrasService";
 import heroImage from "@/assets/hero-agents.jpg";
 
 interface DashboardProps {
@@ -11,6 +15,37 @@ interface DashboardProps {
 }
 
 export const Dashboard = ({ agentCount, onNavigate }: DashboardProps) => {
+  const [selectedModel, setSelectedModel] = useState('llama3.1-8b');
+  const [availableModels, setAvailableModels] = useState<string[]>([]);
+  const [apiKeyConfigured, setApiKeyConfigured] = useState(false);
+
+  useEffect(() => {
+    const checkApiKey = async () => {
+      const storedKey = CerebrasService.getStoredApiKey();
+      if (storedKey) {
+        setApiKeyConfigured(true);
+        try {
+          const service = new CerebrasService(storedKey);
+          const models = await service.getModels();
+          setAvailableModels(models);
+        } catch (error) {
+          console.error('Failed to load models:', error);
+        }
+      }
+    };
+    checkApiKey();
+  }, []);
+
+  const handleApiKeySet = async (apiKey: string) => {
+    setApiKeyConfigured(true);
+    try {
+      const service = new CerebrasService(apiKey);
+      const models = await service.getModels();
+      setAvailableModels(models);
+    } catch (error) {
+      console.error('Failed to load models:', error);
+    }
+  };
   const stats = [
     {
       title: "Active Agents",
@@ -121,6 +156,62 @@ export const Dashboard = ({ agentCount, onNavigate }: DashboardProps) => {
             </Card>
           );
         })}
+      </div>
+
+      {/* AI Model Configuration */}
+      <div className="space-y-4">
+        <h2 className="text-2xl font-semibold text-foreground">AI Model Configuration</h2>
+        <Card className="bg-gradient-to-br from-card to-secondary/30 border-border/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5 text-primary" />
+              Cerebras AI Configuration
+            </CardTitle>
+            <CardDescription>
+              Configure your Cerebras AI settings and select the model for agent interactions
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <CerebrasApiKeyDialog onApiKeySet={handleApiKeySet}>
+                  <Button variant="outline" className="w-full sm:w-auto">
+                    <Settings className="h-4 w-4 mr-2" />
+                    {apiKeyConfigured ? 'Update API Key' : 'Configure API Key'}
+                  </Button>
+                </CerebrasApiKeyDialog>
+              </div>
+              
+              {apiKeyConfigured && availableModels.length > 0 && (
+                <div className="flex-1">
+                  <Select value={selectedModel} onValueChange={setSelectedModel}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select AI Model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableModels.map((model) => (
+                        <SelectItem key={model} value={model}>
+                          {model}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Badge variant={apiKeyConfigured ? "default" : "secondary"}>
+                {apiKeyConfigured ? "✓ API Key Configured" : "⚠ API Key Required"}
+              </Badge>
+              {selectedModel && (
+                <Badge variant="outline">
+                  Selected: {selectedModel}
+                </Badge>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Quick Actions */}
