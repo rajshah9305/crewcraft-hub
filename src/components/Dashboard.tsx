@@ -2,9 +2,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Bot, Users, Zap, TrendingUp, ArrowRight, Sparkles, Settings } from "lucide-react";
+import { Bot, Users, Zap, TrendingUp, ArrowRight, Sparkles, Settings, Terminal } from "lucide-react";
 import { RecentRuns } from "./RecentRuns";
 import { CerebrasApiKeyDialog } from "./CerebrasApiKeyDialog";
+import { ModelSelector } from "./ModelSelector";
+import { ToolSelector } from "./ToolSelector";
+import { LiveAgentConsole } from "./LiveAgentConsole";
 import { useState, useEffect } from "react";
 import { CerebrasService } from "@/services/cerebrasService";
 import heroImage from "@/assets/hero-agents.jpg";
@@ -18,6 +21,9 @@ export const Dashboard = ({ agentCount, onNavigate }: DashboardProps) => {
   const [selectedModel, setSelectedModel] = useState('llama3.1-8b');
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [apiKeyConfigured, setApiKeyConfigured] = useState(false);
+  const [selectedDemoModel, setSelectedDemoModel] = useState<string>("");
+  const [selectedTools, setSelectedTools] = useState<string[]>([]);
+  const [isConsoleRunning, setIsConsoleRunning] = useState(false);
 
   useEffect(() => {
     const checkApiKey = async () => {
@@ -244,6 +250,89 @@ export const Dashboard = ({ agentCount, onNavigate }: DashboardProps) => {
               </Card>
             );
           })}
+        </div>
+      </div>
+
+      {/* Premium Agent Builder Preview */}
+      <div className="space-y-6">
+        <h2 className="text-2xl font-semibold text-foreground">Premium Agent Builder</h2>
+        
+        {/* Model Selector Demo */}
+        <Card className="bg-gradient-to-br from-card to-secondary/30 border-border/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Bot className="h-5 w-5 text-primary" />
+              Advanced Model Selection
+            </CardTitle>
+            <CardDescription>
+              Choose from leading AI models with detailed capabilities and performance metrics
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ModelSelector 
+              selectedModel={selectedDemoModel}
+              onModelChange={setSelectedDemoModel}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Tool Selector Demo */}
+        <Card className="bg-gradient-to-br from-card to-secondary/30 border-border/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Zap className="h-5 w-5 text-accent" />
+              Extensible Tools & Capabilities
+            </CardTitle>
+            <CardDescription>
+              Select from pre-built tools or define custom capabilities for your agents
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ToolSelector 
+              selectedTools={selectedTools}
+              onToolsChange={setSelectedTools}
+              maxSelections={5}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Live Console Demo */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <LiveAgentConsole 
+              isRunning={isConsoleRunning}
+              onPause={() => setIsConsoleRunning(false)}
+              onResume={() => setIsConsoleRunning(true)}
+              onReset={() => setIsConsoleRunning(false)}
+            />
+          </div>
+          <Card className="bg-gradient-to-br from-card to-secondary/30 border-border/50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Terminal className="h-5 w-5 text-primary" />
+                Live Agent Console
+              </CardTitle>
+              <CardDescription>
+                Real-time monitoring of agent execution with detailed progress tracking
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <p>• View live agent progress</p>
+                <p>• Monitor tool usage</p>
+                <p>• Track reasoning chains</p>
+                <p>• Real-time output display</p>
+                <p>• Timestamped execution logs</p>
+              </div>
+              <Button 
+                variant={isConsoleRunning ? "destructive" : "default"}
+                onClick={() => setIsConsoleRunning(!isConsoleRunning)}
+                className="w-full"
+              >
+                {isConsoleRunning ? "Stop Demo" : "Start Demo"}
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
 
